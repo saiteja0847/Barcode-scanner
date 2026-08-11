@@ -2,10 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
   <title>Storage Checker</title>
 </head>
 <body>
-  <p>Storage Checker — under construction. Spike page: <a href="spike.html">spike.html</a></p>
+  <header>
+    <div id="mode-toggle">
+      <button id="btn-storage">STORAGE</button>
+      <button id="btn-store">STORE</button>
+    </div>
+    <button id="btn-list">List (0)</button>
+  </header>
+  <p id="mode-hint"></p>
+  <main>
+    <video id="video" playsinline muted autoplay></video>
+    <div id="scan-error"></div>
+    <div id="overlay"></div>
+  </main>
+  <section id="view-list">
+    <header>
+      <button id="btn-close-list">← Back to scanning</button>
+      <span id="list-count"></span>
+    </header>
+    <input id="search" type="search" placeholder="Search name or barcode" />
+    <ul id="items"></ul>
+  </section>
+  <script type="module" src="src/ui/main.ts"></script>
 </body>
 </html>
