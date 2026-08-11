@@ -85,6 +85,7 @@ video { width: 100%; height: 100%; object-fit: cover; display: block; }
 #items li.empty,
 #bring-items li.empty { color: #888; border: none; padding-top: 40px; text-align: center; display: block; }
 .overlay-btn.stepper { font-size: 26px; width: 64px; }
+.overlay-hint { font-size: 14px; color: rgba(255, 255, 255, 0.75); margin-top: 8px; }
 .stepper-count { font-size: 34px; font-weight: 800; color: #fff; min-width: 60px; text-align: center; align-self: center; }
 .item-label { font-size: 18px; font-weight: 600; flex: 1 1 100%; }
 .item-meta { color: #888; font-size: 13px; flex: 1; }

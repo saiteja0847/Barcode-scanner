@@ -105,7 +105,11 @@ export function showResult(kind: FlashKind, title: string, subtitle: string, act
         actions.onBring!(qty);
         hideOverlay();
       };
-      row.append(minus, count, plus, add);
+      const cancel = document.createElement("button");
+      cancel.textContent = "Cancel";
+      cancel.className = "overlay-btn secondary";
+      cancel.onclick = hideOverlay;
+      row.append(minus, count, plus, add, cancel);
       el.append(row);
     };
     el.append(bringBtn);
@@ -120,6 +124,22 @@ export function showResult(kind: FlashKind, title: string, subtitle: string, act
     };
     el.append(rm);
   }
+
+  if (actions.onRemove || actions.onBring) {
+    const hint = document.createElement("div");
+    hint.className = "overlay-hint";
+    hint.textContent = "tap anywhere for next product";
+    el.append(hint);
+  }
+
+  // Tap anywhere (except buttons/inputs) to dismiss immediately and keep
+  // scanning — no dwell between products. Sticky sheets (name box, qty
+  // stepper) are exempt so a stray tap can't discard typed input.
+  el.onclick = (ev) => {
+    if (sheetOpen) return;
+    if (ev.target instanceof HTMLElement && ev.target.closest("button, input")) return;
+    hideOverlay();
+  };
 
   el.classList.add("visible");
   if (hideTimer !== null) clearTimeout(hideTimer);
