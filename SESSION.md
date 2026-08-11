@@ -25,3 +25,8 @@
 - Package installs are user-run — hand over commands, never run them.
 - Deploys: push to main → Actions → Pages. Qty input is a stepper on purpose:
   avoids reopening the iOS keyboard problem.
+
+## 2026-08-11 later
+- Overlay flow fix shipped: tap anywhere dismisses result overlays instantly;
+  qty stepper gained a Cancel (was a trap: no exit without adding). Verified
+  via module-level browser test; deployed green.
