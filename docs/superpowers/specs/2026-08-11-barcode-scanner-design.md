@@ -189,3 +189,15 @@ time the phone happens to be online.
 3. UI + scanner wiring; on-device verification.
 4. PWA shell: manifest, service worker, icons; Airplane-Mode acceptance test.
 5. Polish + deploy + install on the store phone; list search, name editing.
+
+## Amendment — 2026-08-11: bring-to-shelf picklist (v1.1)
+
+User-requested after v1 field use. In Store mode, an in-storage result offers
+"Bring to shelf…" with a [−] n [+] stepper (no keyboard — avoids the iOS
+keyboard-offset bug fixed the same day). Picks live in a new `picks` object
+store (`PickItem { barcode, qty, addedAt }`, qty clamped 1–99); DB upgraded
+v1→v2 in place with guarded store creation — existing items preserved
+(migration covered by tests/picks-db.test.ts). A "Bring (N)" header button
+opens the picklist: rows show name (joined from items) ×qty, newest first;
+tapping Done removes the row. Re-adding a product overwrites its qty.
+Storage remains presence-only — qty is what the shelf needs, not back-room count.
