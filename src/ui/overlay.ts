@@ -20,9 +20,15 @@ export function isNameSheetOpen(): boolean {
 
 export function hideOverlay(): void {
   nameSheetOpen = false;
+  // Blur before clearing so iOS closes the keyboard, then undo the scroll
+  // offset iOS applies to keep a focused input visible — in a fixed-height
+  // standalone app it is not always restored and leaves the header off-screen.
+  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
   const el = document.getElementById("overlay")!;
   el.classList.remove("visible");
   el.innerHTML = "";
+  window.scrollTo(0, 0);
+  window.setTimeout(() => window.scrollTo(0, 0), 250);
 }
 
 export function showResult(kind: FlashKind, title: string, subtitle: string, actions: OverlayActions = {}): void {
