@@ -1,26 +1,27 @@
-# Session — 2026-08-11
+# Session — 2026-08-11 (updated after v1.1)
 
 ## Done
-- Spec + plan (docs/superpowers/).
-- v1 built and deployed: https://saiteja0847.github.io/Barcode-scanner/
-- All 13 plan tasks committed; tests green (`npm test`, 36 tests); offline precache
-  verified including the zxing wasm; live deploy verified serving the real UI + sw.js.
-- Phone spike passed (user: 3/3 real barcodes decoded via camera on iPhone).
+- v1 shipped and field-tested by user (scanning works on the store iPhone).
+- Keyboard bug fixed: iOS left the header scrolled off-screen after the name
+  sheet closed → blur + double `scrollTo(0,0)` in `hideOverlay()`.
+- v1.1 bring-to-shelf picklist shipped: "Bring to shelf…" + qty stepper on
+  in-storage results (Store mode), "Bring (N)" header view with Done-tap rows,
+  `picks` object store, DB v1→v2 in-place migration (test-covered, and
+  exercised live in a real browser). 46 tests green. Deploy verified live.
 
 ## Works
-- Storage/Store scan modes, 3s cooldown, normalization (UPC-A/E→GTIN-13, EAN-8
-  kept distinct), list view (search/rename/two-tap delete), IndexedDB persistence,
-  PWA offline install (SW activated, wasm precached — verified in browser).
+- Both modes, cooldown, normalization, list view, bring list, offline PWA.
 
 ## Next step
-- User acceptance on the real iPhone: install to home screen, run the
-  airplane-mode checklist (scan both modes offline, restart phone, list intact).
-- v1.1 candidates: export/backup of the list; undo after remove.
+- User verifies on phone: (1) header stays after saving a name, (2) bring flow
+  end-to-end, (3) existing storage items intact after the auto-update.
+- v1.2 candidates: list export/backup (top priority — protects against icon
+  deletion), undo-after-remove.
 
 ## Notes for future sessions
-- Deploys: push to main → GitHub Actions → Pages (Pages was enabled via
-  `gh api .../pages -X POST -f build_type=workflow`; workflow's auto-enable failed once).
-- `zxing-wasm` is pinned EXACTLY to 3.1.1 to match barcode-detector's pin —
-  a range here can re-split the dependency tree and silently break offline wasm.
-- `.claude/launch.json` is gitignored (machine-specific absolute node path;
-  the in-app preview launcher couldn't resolve PATH — use Bash `npm run dev` instead).
+- DB is now VERSION 2 (stores: items, picks). Any schema change bumps version
+  with guarded store creation; always add a migration test first.
+- `zxing-wasm` pinned exactly to 3.1.1 (must match barcode-detector's pin).
+- Package installs are user-run — hand over commands, never run them.
+- Deploys: push to main → Actions → Pages. Qty input is a stepper on purpose:
+  avoids reopening the iOS keyboard problem.
