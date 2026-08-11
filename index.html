@@ -15,6 +15,7 @@
       <button id="btn-store">STORE</button>
     </div>
     <button id="btn-list">List (0)</button>
+    <button id="btn-bring">Bring (0)</button>
   </header>
   <p id="mode-hint"></p>
   <main>
@@ -29,6 +30,13 @@
     </header>
     <input id="search" type="search" placeholder="Search name or barcode" />
     <ul id="items"></ul>
+  </section>
+  <section id="view-bring">
+    <header>
+      <button id="btn-close-bring">← Back to scanning</button>
+      <span id="bring-count"></span>
+    </header>
+    <ul id="bring-items"></ul>
   </section>
   <script type="module" src="src/ui/main.ts"></script>
 </body>

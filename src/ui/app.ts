@@ -6,7 +6,7 @@ import { IndexedDbItemStore } from "../providers/db";
 import { BrowserScanner } from "../providers/scanner.browser";
 import { ScannerStartError, type ScanResult } from "../providers/scanner";
 import { beep, initAudio } from "./audio";
-import { isNameSheetOpen, showResult } from "./overlay";
+import { isSheetOpen, showResult } from "./overlay";
 
 type Mode = "storage" | "store";
 
@@ -31,13 +31,14 @@ function showDbError(e: unknown): void {
   showResult("red", "SAVE FAILED", e instanceof Error ? e.message : String(e));
 }
 
-async function refreshCount(): Promise<void> {
-  const n = (await db.all()).length;
-  document.getElementById("btn-list")!.textContent = `List (${n})`;
+async function refreshCounts(): Promise<void> {
+  const [items, picks] = await Promise.all([db.all(), db.allPicks()]);
+  document.getElementById("btn-list")!.textContent = `List (${items.length})`;
+  document.getElementById("btn-bring")!.textContent = `Bring (${picks.length})`;
 }
 
 async function handleDecode(results: ScanResult[]): Promise<void> {
-  if (busy || isNameSheetOpen()) return;
+  if (busy || isSheetOpen()) return;
   const first = results.find((r) => {
     const code = normalizeBarcode(r.rawValue, r.format);
     return code !== null && gate.shouldProcess(code, Date.now());
@@ -66,8 +67,14 @@ async function handleDecode(results: ScanResult[]): Promise<void> {
       if (res.inStorage) {
         beep.inStorage();
         showResult("green", "IN THE BACK ✓", res.item.name ?? code, {
+          onBring: (qty) => {
+            void db
+              .putPick({ barcode: code, qty, addedAt: new Date().toISOString() })
+              .then(refreshCounts)
+              .catch(showDbError);
+          },
           onRemove: () => {
-            void db.remove(code).then(refreshCount).catch(showDbError);
+            void db.remove(code).then(refreshCounts).catch(showDbError);
           },
         });
       } else {
@@ -75,7 +82,7 @@ async function handleDecode(results: ScanResult[]): Promise<void> {
         showResult("red", "NOT IN STORAGE ✗", code);
       }
     }
-    await refreshCount();
+    await refreshCounts();
   } catch (e) {
     showDbError(e);
   } finally {
@@ -125,7 +132,16 @@ function wireUi(): void {
   };
   document.getElementById("btn-close-list")!.onclick = () => {
     document.getElementById("view-list")!.classList.remove("visible");
-    void refreshCount();
+    void refreshCounts();
+  };
+  document.getElementById("btn-bring")!.onclick = () => {
+    initAudio();
+    void import("./bring").then(({ renderBring }) => renderBring(db));
+    document.getElementById("view-bring")!.classList.add("visible");
+  };
+  document.getElementById("btn-close-bring")!.onclick = () => {
+    document.getElementById("view-bring")!.classList.remove("visible");
+    void refreshCounts();
   };
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") void requestWakeLock();
@@ -135,7 +151,7 @@ function wireUi(): void {
 async function main(): Promise<void> {
   wireUi();
   setMode("store");
-  await refreshCount();
+  await refreshCounts();
   await requestWakeLock();
   await startScanner();
 }

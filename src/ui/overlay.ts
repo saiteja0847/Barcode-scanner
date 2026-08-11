@@ -1,3 +1,5 @@
+import { clampQty } from "../logic/picks";
+
 export type FlashKind = "green" | "red" | "gray";
 
 const COLORS: Record<FlashKind, string> = {
@@ -9,17 +11,19 @@ const COLORS: Record<FlashKind, string> = {
 export interface OverlayActions {
   onSaveName?: (name: string) => void;
   onRemove?: () => void;
+  onBring?: (qty: number) => void;
 }
 
 let hideTimer: number | null = null;
-let nameSheetOpen = false;
+let sheetOpen = false;
 
-export function isNameSheetOpen(): boolean {
-  return nameSheetOpen;
+/** True while a sticky input (name box or qty stepper) is open — scanning must pause. */
+export function isSheetOpen(): boolean {
+  return sheetOpen;
 }
 
 export function hideOverlay(): void {
-  nameSheetOpen = false;
+  sheetOpen = false;
   // Blur before clearing so iOS closes the keyboard, then undo the scroll
   // offset iOS applies to keep a focused input visible — in a fixed-height
   // standalone app it is not always restored and leaves the header off-screen.
@@ -44,7 +48,7 @@ export function showResult(kind: FlashKind, title: string, subtitle: string, act
   sub.textContent = subtitle;
   el.append(h, sub);
 
-  nameSheetOpen = Boolean(actions.onSaveName);
+  sheetOpen = Boolean(actions.onSaveName);
   if (actions.onSaveName) {
     const row = document.createElement("div");
     row.className = "overlay-row";
@@ -66,6 +70,46 @@ export function showResult(kind: FlashKind, title: string, subtitle: string, act
     row.append(input, save, skip);
     el.append(row);
   }
+  if (actions.onBring) {
+    const bringBtn = document.createElement("button");
+    bringBtn.textContent = "Bring to shelf…";
+    bringBtn.className = "overlay-btn";
+    bringBtn.onclick = () => {
+      if (hideTimer !== null) clearTimeout(hideTimer);
+      sheetOpen = true; // hold the overlay (and pause scanning) while choosing
+      bringBtn.remove();
+      const row = document.createElement("div");
+      row.className = "overlay-row";
+      let qty = 1;
+      const minus = document.createElement("button");
+      minus.textContent = "−";
+      minus.className = "overlay-btn stepper";
+      const count = document.createElement("div");
+      count.className = "stepper-count";
+      count.textContent = "1";
+      const plus = document.createElement("button");
+      plus.textContent = "+";
+      plus.className = "overlay-btn stepper";
+      minus.onclick = () => {
+        qty = clampQty(qty - 1);
+        count.textContent = String(qty);
+      };
+      plus.onclick = () => {
+        qty = clampQty(qty + 1);
+        count.textContent = String(qty);
+      };
+      const add = document.createElement("button");
+      add.textContent = "Add";
+      add.className = "overlay-btn";
+      add.onclick = () => {
+        actions.onBring!(qty);
+        hideOverlay();
+      };
+      row.append(minus, count, plus, add);
+      el.append(row);
+    };
+    el.append(bringBtn);
+  }
   if (actions.onRemove) {
     const rm = document.createElement("button");
     rm.textContent = "Remove from storage list";
@@ -79,7 +123,7 @@ export function showResult(kind: FlashKind, title: string, subtitle: string, act
 
   el.classList.add("visible");
   if (hideTimer !== null) clearTimeout(hideTimer);
-  if (!nameSheetOpen) {
-    hideTimer = window.setTimeout(hideOverlay, actions.onRemove ? 4000 : 1600);
+  if (!sheetOpen) {
+    hideTimer = window.setTimeout(hideOverlay, actions.onRemove || actions.onBring ? 4000 : 1600);
   }
 }
