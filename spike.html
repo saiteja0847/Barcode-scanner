@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Scan Spike</title>
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+    #selftest { padding: 10px 14px; font-weight: 600; }
+    #selftest.pass { color: #4ade80; }
+    #selftest.fail { color: #f87171; }
+    video { display: block; width: 100%; max-height: 55vh; background: #000; }
+    #err { color: #f87171; padding: 12px 14px; white-space: pre-wrap; }
+    ul { margin: 0; padding: 10px 14px; list-style: none; font-size: 18px; }
+    li { padding: 8px 0; border-bottom: 1px solid #333; }
+  </style>
+</head>
+<body>
+  <div id="selftest">Self-test: running…</div>
+  <video id="video" playsinline muted autoplay></video>
+  <div id="err"></div>
+  <ul id="log"></ul>
+  <script type="module" src="src/spike.ts"></script>
+</body>
+</html>
